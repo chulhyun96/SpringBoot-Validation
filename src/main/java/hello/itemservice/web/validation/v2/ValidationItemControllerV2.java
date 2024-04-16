@@ -44,7 +44,7 @@ public class ValidationItemControllerV2 {
         return "validation/v2/addForm";
     }
 
-    @PostMapping("/add")
+    /*@PostMapping("/add")*/
     public String addItemV1(@ModelAttribute Item item,BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
 
@@ -76,6 +76,39 @@ public class ValidationItemControllerV2 {
         redirectAttributes.addAttribute("status", true);
         return "redirect:/validation/v2/items/{itemId}";
     }
+    @PostMapping("/add")
+    public String addItemV2(@ModelAttribute Item item,BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+
+
+        //validation logic, Field Error
+        if (!StringUtils.hasText(item.getItemName())) {
+            bindingResult.addError(new FieldError("item","itemName",item.getItemName(),false, null,null,"상품 이름은 필수 입니다."));
+        }
+        if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 10000000) {
+            bindingResult.addError(new FieldError("item","price",item.getPrice(),false, null,null,"ERROR Price."));
+        }
+        if (item.getQuantity() == null || item.getQuantity() >= 9999) {
+            bindingResult.addError(new FieldError("item","quantity", item.getQuantity(),false, null,null,"ERROR Quantity."));
+        }
+        //Global Error
+        if (item.getPrice() != null && item.getItemName() != null) {
+            int totalPrice = item.getPrice( ) * item.getQuantity();
+            if (totalPrice < 10000) {
+                bindingResult.addError(new ObjectError("item",null,null,"ERROR Price * Quantity."));
+            }
+        }
+
+        // if validation failed, show AddForm again
+        if (bindingResult.hasErrors()) {
+            return "validation/v2/addForm";
+        }
+        // success logic
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        return "redirect:/validation/v2/items/{itemId}";
+    }
+
 
 
     @GetMapping("/{itemId}/edit")
