@@ -45,7 +45,7 @@ public class ValidationItemControllerV2 {
     }
 
     @PostMapping("/add")
-    public String addItemV1(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String addItemV1(@ModelAttribute Item item,BindingResult bindingResult, RedirectAttributes redirectAttributes) {
 
 
         //validation logic, Field Error
@@ -70,7 +70,6 @@ public class ValidationItemControllerV2 {
         if (bindingResult.hasErrors()) {
             return "validation/v2/addForm";
         }
-
         // success logic
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
