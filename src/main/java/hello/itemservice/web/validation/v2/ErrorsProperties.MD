@@ -52,3 +52,57 @@ if (!StringUtils.hasText(item.getItemName())) {
 ![img.png](img.png)
 
 **참고**: `errors_en.properties` 파일을 생성하면 오류 메시지도 국제화 처리를 할 수 있다.
+
+
+### Spring이 만든 에러 처리하기
+
+검증 오류 코드는 크게 두가지로 나눌 수 있다.
+- `BindingResult`의  `rejectValue()`, errors.propertis를 통해 개발자가 정의한 에러메시지
+- Spring이 만든 에러 메시지
+
+앞선 내용에서 BindingResult를 이용하여 에러메시지를 정의해봤고, Spring이 만든 에러메시지를 재정의 해보도록 하겠다.
+
+먼저 `price`필드에 문자를 넣어보겠다.
+
+![img_1.png](img_1.png)
+
+이러한 에러메시지가 나온다. 이는 `price`필드는 int 타입인데, 문자타입을 넣으니 `Convert`를 실패했다는 오류가 나온다. 쉽게 말해
+타입 오류인 것이다. 이는 Spring이 만든 에러메시지인데 이를 재정의 해보겠다.
+
+
+에러가 났을 경우 BindingResult가 이를 잡았을 테니 로그를 확인해보자.
+
+```console
+codes [typeMismatch.item.price,typeMismatch.price,typeMismatch.java.lang.Integer,typeMismatch];
+```
+
+이를 자세히 보면 다음과 같이 4가지 메시지 코드가 나온걸 확인할 수 있다.
+- `typeMismatch.item.price`
+- `typeMismatch.item.price`
+- `typeMismatch.java.lang.Integer`
+- `typeMismatch`
+
+그리고 이미지에서 보였던 에러메시지는 해당 메시지의 defualtMessage가 출력된 것이다.
+```console
+default message [Failed to convert property value of type 'java.lang.String' to required type 'java.lang.Integer' for property 'price'; nested exception is java.lang.NumberFormatException: For input string: "qqqq"]
+```
+
+스프링은 타입 오류가 발생하면 `typeMismatch` 라는 오류 코드를 사용한다. 이 오류 코드가 `MessageCodesResolver` 를 통하면서 4가지 메시지 코드가 생성된 것이다.
+
+아직 `errors.properties` 에 메시지 코드가 없기 때문에 스프링이 생성한 기본 메시지가 출력된 것이다. 이를 이용하여 `errors.properties`에 에러 코드를 재정의 할 수 있다.
+
+`error.properties` 에 다음 내용을 추가하자.
+```properties
+#추가
+typeMismatch.java.lang.Integer=숫자를 입력해주세요.
+typeMismatch=타입 오류입니다.
+```
+그리고 실행해보면
+![img_3.png](img_3.png)
+이러한 결과가 나온다.
+
+typeMismatch.java.lang.Integer=숫자를 입력해주세요. 해당 내용이 적용된거 같다. 이는 level3에 해당하는 에러 범위이다.
+
+
+
+
