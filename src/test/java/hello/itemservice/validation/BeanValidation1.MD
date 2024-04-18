@@ -1,0 +1,137 @@
+
+#### Bean Validation Anntation 1
+#BeanValidation : 검증 기능을 지금처럼 매번(Validation) 코드로 작성하는 것은 상당히 번거롭다. 특히 특정 필드에 대
+한 검증 로직은 대부분 빈 값인지 아닌지 특정 크기를 넘는지 아닌지와 같이 매우 일반적인 로직이다.
+
+그래서 이것또한 애노테이션으로 단순화 시키자고 해서 만들었다.
+
+__@NotBlank__ : 값이 null이면 안되고, 빈 문자면 안되고, 공백이 있으면 안된다는 뜻.
+
+__@NotNull__ : 값이 null이면 안된다는 뜻
+
+__@Range__ : 파라미터로 min과 max를 넣을 수 있다.
+
+__@Max__ : 파라미터로 최대치를 넣을 수 있다.
+
+이런 검증 로직을 모든 프로젝트에 적용할 수 있게 공통화하고, 표준화 한 것이 바로 Bean Validation이다. Bean Validation을 잘 활용하면, 애노테이션 하나로 검증 로직을 매우 편리하게 적용할 수 있다.
+
+**Bean Validation이란**
+먼저 Bean Validation은 특정한 구현체가 아니라 Bean Validation 2.0(JSR-380)이라는 기술 표준이다. 쉽게 이야 기해서 검증 애노테이션과 여러 인터페이스의 모음이다. Bean Validation을 구현한 기술중에 일반적으로 사용하는 구현체는 하이버네이트 Validator이다. 이름이 `하이버네이트`가 붙어서 그렇지 ORM과는 관련이 없다.
+
+- 공식 사이트: http://hibernate.org/validator/
+- 공식 메뉴얼: https://docs.jboss.org/hibernate/validator/6.2/reference/en-US/html_single/
+- 검증 애노테이션 모음: https://docs.jboss.org/hibernate/validator/6.2/reference/en-US/html_single/#validator-defineconstraints-spec
+
+
+@Bean Validation의 애노테이션 기능을 도메인 클래스에 적용시켜주자
+```java
+package hello.itemservice.domain.item;
+
+import lombok.Data;
+import org.hibernate.validator.constraints.Range;
+
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+@Data
+public class Item {
+
+    private Long id;
+
+    @NotBlank
+    private String itemName;
+
+    @NotNull
+    @Range(min = 1000, max = 1000000)
+    private Integer price;
+
+    @NotNull
+    @Max(9999)
+    private Integer quantity;
+
+    public Item() {
+    }
+
+    public Item(String itemName, Integer price, Integer quantity) {
+        this.itemName = itemName;
+        this.price = price;
+        this.quantity = quantity;
+    }
+}
+```
+**검증 애노테이션**
+-  `@NotBlank` : 빈값 + 공백만 있는 경우를 허용하지 않는다.
+- `@NotNull` : `null` 을 허용하지 않는다.
+- `@Range(min = 1000, max = 1000000)` : 범위 안의 값이어야 한다.
+- `@Max(9999)` : 최대 9999까지만 허용한다.
+
+**참고**
+
+`javax.validation.constraints.NotNull`
+`org.hibernate.validator.constraints.Range`
+`javax.validation` 으로 시작하면 특정 구현에 관계없이 제공되는 표준 인터페이스이고,
+`org.hibernate.validator` 로 시작하면 하이버네이트 validator 구현체를 사용할 때만 제공되는 검증 기능이다. 실무에서 대부분 하이버네이트 validator를 사용하므로 자유롭게 사용해도 된다.
+
+**Test 해보기**
+```java
+package hello.itemservice.validation;
+
+import hello.itemservice.domain.item.Item;
+import org.junit.jupiter.api.Test;
+
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
+import java.util.Set;
+
+public class BeanValidationTest {
+    @Test
+    void beanValidation() {
+        ValidatorFactory validatorFactory = Validation.buildDefaultValidatorFactory();
+        Validator validator = validatorFactory.getValidator();
+
+        Item item = new Item();
+        item.setItemName("   ");
+        item.setPrice(0);
+        item.setQuantity(1000000);
+
+        Set<ConstraintViolation<Item>> validate = validator.validate(item);
+        for (ConstraintViolation<Item> violation : validate) {
+            System.out.println("violation = " + violation);
+            System.out.println("violation = " + violation.getMessage());
+        }
+
+    }
+}
+
+```
+
+**실행 결과 (일부 생략)**
+```console
+violation={interpolatedMessage='공백일 수 없습니다', propertyPath=itemName, rootBeanClass=class hello.itemservice.domain.item.Item, messageTemplate='{javax.validation.constraints.NotBlank.message}'} violation.message=공백일 수 없습니다
+
+violation={interpolatedMessage='9999 이하여야 합니다', propertyPath=quantity, rootBeanClass=class hello.itemservice.domain.item.Item, messageTemplate='{javax.validation.constraints.Max.message}'} violation.message=9999 이하여야 합니다
+
+violation={interpolatedMessage='1000에서 1000000 사이여야 합니다', propertyPath=price, rootBeanClass=class hello.itemservice.domain.item.Item, messageTemplate='{org.hibernate.validator.constraints.Range.message}'}
+violation.message=1000에서 1000000 사이여야 합니다
+```
+여기서 나온 메시지는 개발자가 정의한 메시지가 아니라, 구현체인 `Hibernate Validator`가 생성해낸 DefualtMessage이다. (내가 직접 수정할 수 있다.)
+
+**검증 실행**
+
+검증 대상( `item` )을 직접 검증기에 넣고 그 결과를 받는다. `Set`에는`ConstraintViolation` 이라는 검증 오류가담긴다. 따라서 결과가 비어있으면 검증 오류가 없는것이다.
+`Set<ConstraintViolation<Item>> violations = validator.validate(item);`
+
+**ConstraintViolation**
+
+ConstraintViolation 클래스는 Bean Validation API의 핵심 클래스 중 하나로써, 이 클래스는 Bean Validation의 제약 조건(Constraints)이 적용된 개체에 대한 유효성 검사를 실행한 후 발생하는 제약 조건 위반 내용들을 보고한다.
+
+예를 들어 @NotNull, @Min, @Size 등과 같은 제약 경계가 객체의 필드에 적용되어 있고, 해당 필드 값이 이 제약 조건을 위반하면 ConstraintViolation 인스턴스가 생성된다.
+
+**특징**
+- **getInvalidValue()**: 제약 조건을 위반한 값
+- **getMessage()**: 제약 조건 위반에 대한 에러 메시지. 이 메시지는 제약 조건 애노테이션의 message 속성으로 구성될 수 있다.
+- **getPropertyPath()**: 위반한 속성에 대한 경로.
+- **getRootBean()**: 유효성 검사가 실행된 루트 객체(Bean).
