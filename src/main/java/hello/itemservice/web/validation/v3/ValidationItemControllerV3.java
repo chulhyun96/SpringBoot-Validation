@@ -2,6 +2,8 @@ package hello.itemservice.web.validation.v3;
 
 import hello.itemservice.domain.item.Item;
 import hello.itemservice.domain.item.ItemRepository;
+import hello.itemservice.domain.item.SaveCheck;
+import hello.itemservice.domain.item.UpdateCheck;
 import hello.itemservice.web.validation.v2.ItemValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import javax.naming.Binding;
 import java.util.List;
 
 @Slf4j
@@ -47,10 +50,14 @@ public class ValidationItemControllerV3 {
     }
 
     @PostMapping("/add")
-    public String addItemV6(@Validated @ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
-        // if validation failed, show AddForm again
+    public String addItemV6(@Validated(SaveCheck.class) @ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
-            log.info("BindingResult Errors = {}", bindingResult);
+            log.info("validation v3 FieldErrors : {}", bindingResult);
+            return "validation/v3/addForm";
+        }
+        if (item.getPrice() * item.getQuantity() < 10000) {
+            log.info("validation v3 ObjectErrors : {}", bindingResult);
+            bindingResult.reject("totalPriceMin", new Object[]{10000}, null);
             return "validation/v3/addForm";
         }
         // success logic
@@ -68,7 +75,14 @@ public class ValidationItemControllerV3 {
     }
 
     @PostMapping("/{itemId}/edit")
-    public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
+    public String edit(@PathVariable Long itemId, @Validated(UpdateCheck.class) @ModelAttribute Item item, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            return "validation/v3/editForm";
+        }
+        if (item.getPrice() * item.getQuantity() < 10000) {
+            bindingResult.reject("totalPriceMin", new Object[]{10000}, null);
+            return "validation/v3/editForm";
+        }
         itemRepository.update(itemId, item);
         return "redirect:/validation/v3/items/{itemId}";
     }
