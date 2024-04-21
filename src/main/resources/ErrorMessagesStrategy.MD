@@ -12,7 +12,7 @@
 **이제 이러한 오류 코드 전략을 도입해보자**
 `errors.properties`
 ```properties
-#required.item.itemName=상품 이름은 필수입니다. #range.item.price=가격은 {0} ~ {1} 까지 허용합니다. #max.item.quantity=수량은 최대 {0} 까지 허용합니다. #totalPriceMin=가격 * 수량의 합은 {0}원 이상이어야 합니다. 현재 값 = {1}
+#required.request.itemName=상품 이름은 필수입니다. #range.request.price=가격은 {0} ~ {1} 까지 허용합니다. #max.request.quantity=수량은 최대 {0} 까지 허용합니다. #totalPriceMin=가격 * 수량의 합은 {0}원 이상이어야 합니다. 현재 값 = {1}
 
 #==ObjectError==  
 #Level1  

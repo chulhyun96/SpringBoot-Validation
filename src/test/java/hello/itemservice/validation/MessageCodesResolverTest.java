@@ -13,21 +13,21 @@ public class MessageCodesResolverTest {
 
     @Test
     void messageCodesResolverObject() {
-        String[] messageCodes = codesResolver.resolveMessageCodes("required", "item");
+        String[] messageCodes = codesResolver.resolveMessageCodes("required", "request");
         for (String messageCode : messageCodes) {
             System.out.println("messageCode = " + messageCode);
         }
-        Assertions.assertThat(codesResolver.resolveMessageCodes("required", "item")).isNotNull();
-        Assertions.assertThat(messageCodes).containsExactly("required.item", "required");
+        Assertions.assertThat(codesResolver.resolveMessageCodes("required", "request")).isNotNull();
+        Assertions.assertThat(messageCodes).containsExactly("required.request", "required");
     }
 
     @Test
     void messageCodesResolverField() {
-        String[] messageCodes = codesResolver.resolveMessageCodes("required", "item", "itemName", String.class);
+        String[] messageCodes = codesResolver.resolveMessageCodes("required", "request", "itemName", String.class);
         for (String messageCode : messageCodes) {
             System.out.println("messageCode = " + messageCode);
         }
         Assertions.assertThat(messageCodes).isNotNull();
-        Assertions.assertThat(messageCodes).containsExactly("required.item.itemName", "required.itemName", "required.java.lang.String","required");
+        Assertions.assertThat(messageCodes).containsExactly("required.request.itemName", "required.itemName", "required.java.lang.String","required");
     }
 }

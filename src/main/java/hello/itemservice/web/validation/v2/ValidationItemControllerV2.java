@@ -56,19 +56,19 @@ public class ValidationItemControllerV2 {
 
         //validation logic, Field Error
         if (!StringUtils.hasText(item.getItemName())) {
-            bindingResult.addError(new FieldError("item","itemName","상품 이름은 필수 입니다."));
+            bindingResult.addError(new FieldError("request","itemName","상품 이름은 필수 입니다."));
         }
         if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 10000000) {
-            bindingResult.addError(new FieldError("item","price","ERROR Price."));
+            bindingResult.addError(new FieldError("request","price","ERROR Price."));
         }
         if (item.getQuantity() == null || item.getQuantity() >= 9999) {
-            bindingResult.addError(new FieldError("item","quantity","ERROR Quantity."));
+            bindingResult.addError(new FieldError("request","quantity","ERROR Quantity."));
         }
         //Global Error
         if (item.getPrice() != null && item.getItemName() != null) {
             int totalPrice = item.getPrice( ) * item.getQuantity();
             if (totalPrice < 10000) {
-                bindingResult.addError(new ObjectError("item","ERROR Price * Quantity."));
+                bindingResult.addError(new ObjectError("request","ERROR Price * Quantity."));
             }
         }
 
@@ -88,19 +88,19 @@ public class ValidationItemControllerV2 {
 
         //validation logic, Field Error
         if (!StringUtils.hasText(item.getItemName())) {
-            bindingResult.addError(new FieldError("item","itemName",item.getItemName(),false, null,null,"상품 이름은 필수 입니다."));
+            bindingResult.addError(new FieldError("request","itemName",item.getItemName(),false, null,null,"상품 이름은 필수 입니다."));
         }
         if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 10000000) {
-            bindingResult.addError(new FieldError("item","price",item.getPrice(),false, null,null,"ERROR Price."));
+            bindingResult.addError(new FieldError("request","price",item.getPrice(),false, null,null,"ERROR Price."));
         }
         if (item.getQuantity() == null || item.getQuantity() >= 9999) {
-            bindingResult.addError(new FieldError("item","quantity", item.getQuantity(),false, null,null,"ERROR Quantity."));
+            bindingResult.addError(new FieldError("request","quantity", item.getQuantity(),false, null,null,"ERROR Quantity."));
         }
         //Global Error
         if (item.getPrice() != null && item.getItemName() != null) {
             int totalPrice = item.getPrice( ) * item.getQuantity();
             if (totalPrice < 10000) {
-                bindingResult.addError(new ObjectError("item",null,null,"ERROR Price * Quantity."));
+                bindingResult.addError(new ObjectError("request",null,null,"ERROR Price * Quantity."));
             }
         }
 
@@ -126,19 +126,19 @@ public class ValidationItemControllerV2 {
 
         //validation logic, Field Error
         if (!StringUtils.hasText(item.getItemName())) {
-            bindingResult.addError(new FieldError("item","itemName",item.getItemName(),false, new String[]{"required.item.itemName"},null,null));
+            bindingResult.addError(new FieldError("request","itemName",item.getItemName(),false, new String[]{"required.request.itemName"},null,null));
         }
         if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 10000000) {
-            bindingResult.addError(new FieldError("item","price",item.getPrice(),false, new String[]{"range.item.price"},new Object[]{1000,1000000},null));
+            bindingResult.addError(new FieldError("request","price",item.getPrice(),false, new String[]{"range.request.price"},new Object[]{1000,1000000},null));
         }
         if (item.getQuantity() == null || item.getQuantity() >= 9999) {
-            bindingResult.addError(new FieldError("item","quantity", item.getQuantity(),false, new String[]{"max.item.quantity"},new Object[]{9999},null));
+            bindingResult.addError(new FieldError("request","quantity", item.getQuantity(),false, new String[]{"max.request.quantity"},new Object[]{9999},null));
         }
         //Global Error
         if (item.getPrice() != null && item.getItemName() != null) {
             int totalPrice = item.getPrice( ) * item.getQuantity();
             if (totalPrice < 10000) {
-                bindingResult.addError(new ObjectError("item",new String[]{"totalPriceMin"},new Object[]{10000,totalPrice},null));
+                bindingResult.addError(new ObjectError("request",new String[]{"totalPriceMin"},new Object[]{10000,totalPrice},null));
             }
         }
 
