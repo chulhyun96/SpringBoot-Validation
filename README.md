@@ -1,1 +1,4 @@
-<h3>인프런 김영한 - 스프링 MVC2편의 Bean Validaion 및 errors.properties의 관련된 내용을 보고 학습 및 정리</h3>
+### Spring이 지원하는 검증 애노테이션인 BeanValidation과 에러 메시지를 처리하는 properties
+- [X] Spring이 지원하는 검증 로직 지원 방법
+- [X] BeanValidation이란?
+- [X] BeanValidation 적용하고 Error 메시지 렌더링 하기
